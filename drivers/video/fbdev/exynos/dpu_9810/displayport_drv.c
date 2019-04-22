@@ -207,6 +207,9 @@ static int displayport_full_link_training(void)
 	struct displayport_device *displayport = get_displayport_drvdata();
 	struct decon_device *decon = get_decon_drvdata(2);
 
+	//dipshit
+	long dipshit = (training_aux_rd_interval*4000)+400;
+
 	displayport_reg_dpcd_read_burst(DPCD_ADD_REVISION_NUMBER, DPCD_BUF_SIZE, val);
 	displayport_info("Full Link Training Start + : %02x %02x\n", val[1], val[2]);
 
@@ -328,7 +331,7 @@ Voltage_Swing_Retry:
 	displayport_info("Voltage_Swing_Retry %02x %02x %02x %02x\n", val[0], val[1], val[2], val[3]);
 	displayport_reg_dpcd_write_burst(DPCD_ADD_TRANING_LANE0_SET, 4, val);
 
-	udelay((training_aux_rd_interval*4000)+400);
+	usleep_range(dipshit, dipshit+100);
 
 	lane_cr_done = 0;
 
