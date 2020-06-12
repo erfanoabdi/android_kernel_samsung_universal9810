@@ -268,7 +268,7 @@ int alloc_rt_sched_group(struct task_group *tg, struct task_group *parent)
 
 #ifdef CONFIG_SMP
 
-#define entity_is_task(se)	(!se->my_q)
+#define entity_is_task(se)	rt_entity_is_task(se)
 #define LOAD_AVG_MAX		47742
 #define cap_scale(v, s) ((v)*(s) >> SCHED_CAPACITY_SHIFT)
 
@@ -391,11 +391,15 @@ __update_load_avg(u64 now, int cpu, struct sched_avg *sa,
 	return decayed;
 }
 
+#ifdef CONFIG_RT_GROUP_SCHED
 void rt_rq_util_change(struct rt_rq *rt_rq)
 {
 	if (&this_rq()->rt == rt_rq)
 		cpufreq_update_util(rt_rq->rq, SCHED_CPUFREQ_RT);
 }
+#else
+void rt_rq_util_change(struct rt_rq *rt_rq) { }
+#endif
 
 #ifdef CONFIG_RT_GROUP_SCHED
 /* Take into account change of utilization of a child task group */
@@ -470,7 +474,9 @@ int update_rt_rq_load_avg(u64 now, int cpu, struct rt_rq *rt_rq, bool update_fre
 {
 	int decayed, removed_util = 0;
 	struct sched_avg *sa = &rt_rq->avg;
+#ifdef CONFIG_RT_GROUP_SCHED
 	struct rq *rq = rt_rq->rq;
+#endif
 
 	if (atomic_long_read(&rt_rq->removed_util_avg)) {
 		long r = atomic_long_xchg(&rt_rq->removed_util_avg, 0);
@@ -503,8 +509,10 @@ int update_rt_rq_load_avg(u64 now, int cpu, struct rt_rq *rt_rq, bool update_fre
 	if (update_freq && (decayed || removed_util))
 		rt_rq_util_change(rt_rq);
 
+#ifdef CONFIG_RT_GROUP_SCHED
 	if (rt_rq == &rq->rt)
 		trace_sched_rt_load_avg_cpu(cpu_of(rq), rt_rq);
+#endif
 
 	return decayed;
 }
@@ -1965,6 +1973,7 @@ static void remove_entity_load_avg(struct sched_rt_entity *rt_se)
 	atomic_long_add(rt_se->avg.util_avg, &rt_rq->removed_util_avg);
 }
 
+#ifdef CONFIG_RT_GROUP_SCHED
 static void attach_task_rt_rq(struct task_struct *p)
 {
 	struct sched_rt_entity *rt_se = &p->rt;
@@ -1974,6 +1983,7 @@ static void attach_task_rt_rq(struct task_struct *p)
 	update_rt_load_avg(now, rt_se, rt_rq, cpu_of(rq_of_rt_rq(rt_rq)));
 	attach_entity_load_avg(rt_rq, rt_se);
 }
+#endif
 
 static void detach_task_rt_rq(struct task_struct *p)
 {
