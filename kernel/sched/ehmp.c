@@ -1046,7 +1046,11 @@ ontime_pick_heavy_task(struct sched_entity *se, struct cpumask *dst_cpus,
 	struct task_struct *p;
 	unsigned int max_util_avg = 0;
 	int task_count = 0;
+#ifdef CONFIG_CGROUP_SCHEDTUNE
 	int boosted = !!global_boost() || !!schedtune_prefer_perf(task_of(se));
+#else
+	int boosted = !!global_boost();
+#endif
 
 	/*
 	 * Since current task does not exist in entity list of cfs_rq,
@@ -1069,11 +1073,13 @@ ontime_pick_heavy_task(struct sched_entity *se, struct cpumask *dst_cpus,
 			goto next_entity;
 
 		p = task_of(se);
+#ifdef CONFIG_CGROUP_SCHEDTUNE
 		if (schedtune_prefer_perf(p)) {
 			heaviest_task = p;
 			*boost_migration = 1;
 			break;
 		}
+#endif
 
 		if (ontime_load_avg(p) < up_threshold)
 			goto next_entity;
