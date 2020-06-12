@@ -13,7 +13,6 @@
 
 #include <linux/plist.h>
 
-#ifdef CONFIG_CGROUP_SCHEDTUNE
 enum stune_group {
 	STUNE_ROOT,
 	STUNE_FOREGROUND,
@@ -21,7 +20,6 @@ enum stune_group {
 	STUNE_TOPAPP,
 	STUNE_GROUP_COUNT,
 };
-#endif
 
 struct gb_qos_request {
 	struct plist_node node;
