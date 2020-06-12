@@ -1529,6 +1529,7 @@ static int __init netlbl_init(void)
 
 init_failure:
 	panic("NetLabel: failed to initialize properly (%d)\n", ret_val);
+	return 0;
 }
 
 subsys_initcall(netlbl_init);
