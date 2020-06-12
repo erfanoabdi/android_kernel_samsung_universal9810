@@ -20,8 +20,8 @@
 #include "five_dmverity.h"
 #include "five.h"
 
-#include "drivers/md/dm.h"
-#include "drivers/block/loop.h"
+#include "md/dm.h"
+#include "block/loop.h"
 
 #ifdef CONFIG_FIVE_DEBUG
 #include <linux/debugfs.h>
